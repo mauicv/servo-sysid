@@ -86,7 +86,7 @@
       <body name="horn" pos="0 0 0">
         <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535"/>
         <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
-        <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" />
+        <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" mass="0.031"/>
 
         <!-- Weight screws mounted on the arm. Positions are placeholder guesses
              (all meshes exported centered) — adjust pos to the real screw holes. -->
