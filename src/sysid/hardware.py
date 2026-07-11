@@ -15,8 +15,11 @@ bus_lock = th.Lock()
 
 device_map = {
     I2C_MUX_ADDR_1: {
-        "rot_encs": [0],
-    }
+        "rot_encs": [0,1,2,3,4,5,6,7],
+    },
+    I2C_MUX_ADDR_2: {
+        "rot_encs": [0,1,2,3,4,5,6,7],
+    },
 }
 
 def init_pca9685(bus, addr=PWM_MUX_ADDR, freq=50):
