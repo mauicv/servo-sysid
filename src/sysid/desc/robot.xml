@@ -50,6 +50,14 @@
     <mesh name="servo_support" file="servo_support.stl" />
     <mesh name="arm" file="arm.stl" />
     <mesh name="sensor" file="sensor.stl" />
+    <mesh name="screw_0" file="screw_0.stl" />
+    <mesh name="screw_1" file="screw_1.stl" />
+    <mesh name="screw_2" file="screw_2.stl" />
+    <mesh name="screw_3" file="screw_3.stl" />
+    <mesh name="screw_4" file="screw_4.stl" />
+    <mesh name="screw_5" file="screw_5.stl" />
+    <mesh name="screw_6" file="screw_6.stl" />
+    <mesh name="screw_7" file="screw_7.stl" />
 
     <!-- Robot materials -->
     <material name="servo_material" rgba="0.4 0.4 0.4 1" />
@@ -57,6 +65,7 @@
     <material name="servo_support_material" rgba="0.917647 0.917647 0.917647 1" />
     <material name="arm_material" rgba="0.647059 0.647059 0.647059 1" />
     <material name="sensor_material" rgba="0.87451 0.447059 0.317647 1" />
+    <material name="screw_material" rgba="0.6 0.6 0.62 1" />
   </asset>
 
   <worldbody>
@@ -78,6 +87,17 @@
         <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535"/>
         <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
         <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" />
+
+        <!-- Weight screws mounted on the arm. Positions are placeholder guesses
+             (all meshes exported centered) — adjust pos to the real screw holes. -->
+        <geom type="mesh" class="visual" mesh="screw_0" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_1" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_2" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_3" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_4" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_5" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_6" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="screw_7" material="screw_material" mass="0.009"/>
       </body>
     </body>
   </worldbody>
