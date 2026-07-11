@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servo-sysid"
+authors = [
+    {name = "Alex Athorne", email = "alexander.athorne@gmail.com"},
+]
+description = "Sys-id for miuzei 25kg servo"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["robotics", "control", "experiments", "rl"]
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "mujoco",
+    "simple-pid"
+]
+dynamic = ["version"]
+
+[tool.setuptools.package-data]
+gnoci_gym = ["desc/*.xml", "desc/assets/*", "dataset/*.json"]

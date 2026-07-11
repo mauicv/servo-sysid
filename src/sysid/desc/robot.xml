@@ -1,0 +1,92 @@
+<mujoco model="miuzei_servo">
+  <compiler angle="radian" meshdir="meshes" autolimits="true" />
+
+  <option timestep="0.002" gravity="0 0 -9.8" integrator="implicitfast" />
+
+  <default>
+    <!-- Miuzei 25kg servo actuator model -->
+    <default class="miuzei_25kg">
+      <general
+        dyntype="filter"
+        dynprm="0.1"
+        gaintype="fixed"
+        gainprm="500"
+        biastype="affine"
+        biasprm="0 -500 -40"
+        forcerange="-2.70 2.70"
+        forcelimited="true" />
+    </default>
+
+    <default class="onshape_export">
+      <joint frictionloss="0.1" armature="0.005" />
+      <position kp="50" dampratio="1" />
+      <default class="visual">
+        <geom group="2" contype="0" conaffinity="0" />
+      </default>
+      <default class="collision">
+        <geom group="3" />
+      </default>
+    </default>
+  </default>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
+    <rgba haze="0.15 0.25 0.35 1" />
+    <global azimuth="160" elevation="-0.2" />
+  </visual>
+
+  <asset>
+    <!-- Scene textures / materials -->
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512"
+      height="3072" />
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4"
+      rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5"
+      reflectance="0.2" />
+
+    <!-- Robot meshes -->
+    <mesh name="servo" file="servo.stl" />
+    <mesh name="servo_horn" file="servo_horn.stl" />
+    <mesh name="servo_support" file="servo_support.stl" />
+    <mesh name="arm" file="arm.stl" />
+    <mesh name="sensor" file="sensor.stl" />
+
+    <!-- Robot materials -->
+    <material name="servo_material" rgba="0.4 0.4 0.4 1" />
+    <material name="servo_horn_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="servo_support_material" rgba="0.917647 0.917647 0.917647 1" />
+    <material name="arm_material" rgba="0.647059 0.647059 0.647059 1" />
+    <material name="sensor_material" rgba="0.87451 0.447059 0.317647 1" />
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 3.5" dir="0 0 -0.1" directional="true" />
+    <camera name="track" mode="trackcom" pos="-0.5 -0.5 0.35"
+      xyaxes="0.7071 -0.7071 0 0.4082 0.4082 0.8165" />
+    <geom name="floor" size="0 0 0.05" pos="0 0 -0.23" type="plane" material="groundplane"
+      friction="1.0 0.005 0.0001" />
+
+    <!-- Fixed base: servo + support + sensor rigidly mounted together, support anchors to world -->
+    <body name="base" pos="0 0 0" childclass="onshape_export">
+      <geom type="mesh" class="visual" mesh="servo_support" material="servo_support_material" pos="0 0 0" />
+      <geom type="mesh" class="visual" mesh="servo" material="servo_material" pos="0 0 0" />
+      <geom type="mesh" class="visual" mesh="sensor" material="sensor_material" pos="0 0 0" />
+
+      <!-- Moving output: servo horn + arm fixed together, driven by the servo joint -->
+      <!-- x=5.5mm, y=-30.1mm,  z=15.35mm -->
+      <body name="horn" pos="0 0 0">
+        <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535"/>
+        <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
+        <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" />
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <general class="miuzei_25kg" name="servo" joint="servo" />
+  </actuator>
+
+  <sensor>
+    <jointpos name="servo-pos" joint="servo" />
+  </sensor>
+</mujoco>
