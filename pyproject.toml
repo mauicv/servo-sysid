@@ -17,7 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "mujoco",
-    "simple-pid"
+    "smbus2"
 ]
 dynamic = ["version"]
 

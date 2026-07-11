@@ -11,9 +11,6 @@ PWM_MUX_ADDR = 0x40
 PCA9685_LED0 = 0x06
 NUM_SERVOS = 1
 
-IMU_GYRO_SCALE = 250.0  # rad/s — clips to [-1, 1] at this angular velocity (1 is 250 deg/s)
-IMU_ACC_SCALE  = 1.0 # m/s² (2g) — clips to [-1, 1] at 2g
-
 bus_lock = th.Lock()
 
 device_map = {
@@ -28,11 +25,6 @@ def init_pca9685(bus, addr=PWM_MUX_ADDR, freq=50):
     bus.write_byte_data(addr, 0xFE, prescale)
     bus.write_byte_data(addr, 0x00, 0x20)  # wake + auto-increment
     time.sleep(0.005)  # oscillator settle
-
-def init_mpu6050(bus, addr=IMU_ADDR):
-    # Write 0 to PWR_MGMT_1 register (0x6B) to wake up
-    bus.write_byte_data(addr, 0x6B, 0x00)
-    time.sleep(0.1)  # settle
 
 def _read(bus, addr, reg, data_len):
     try:
@@ -89,7 +81,6 @@ class Controller:
     def __init__(self):
         self.bus = smbus.SMBus(1)
         init_pca9685(self.bus, PWM_MUX_ADDR, freq=100)
-        init_mpu6050(self.bus, IMU_ADDR)
         
     def get_sensor_data(self):
         sensor_data = read_sensor_data(self.bus)
@@ -105,7 +96,6 @@ if __name__ == "__main__":
     bus = smbus.SMBus(1)
     test_rot_encs(bus)    
     init_pca9685(bus, PWM_MUX_ADDR, freq=100)
-    init_mpu6050(bus, IMU_ADDR)
 
     def display(elapsed, rot_enc_data):
         rot_line = f"  ROT  | " + " ".join(f"{v:5.3f}" if v is not None else "  N/A" for v in rot_enc_data)
