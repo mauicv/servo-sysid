@@ -11,6 +11,10 @@ PWM_MUX_ADDR = 0x40
 PCA9685_LED0 = 0x06
 NUM_SERVOS = 1
 
+SERVO_PWM_THRESHOLD_MIN: int = 500
+SERVO_PWM_THRESHOLD_MAX: int = 2500
+HALF_RANGE = (SERVO_PWM_THRESHOLD_MAX - SERVO_PWM_THRESHOLD_MIN) / 2 # 1000
+
 bus_lock = th.Lock()
 
 device_map = {
@@ -96,13 +100,21 @@ class Controller:
         return reading - self.center_reading
     
     def send_action(self, action):
-        write_servos(self.bus, action, 100)
+        pwm = [self._action_to_pwm(a) for a in action]
+        write_servos(self.bus, pwm, 100)
 
     def center(self):
         write_servos(self.bus, [1500]*16, 100)
         time.sleep(2)
         reading = self.get_sensor_data()
         self.center_reading = reading
+
+    def _action_to_pwm(self, action) -> int:
+        action = max(-0.653, min(action, 0.653))
+        pwm_val = int(SERVO_PWM_THRESHOLD_MIN + (1 + action) * HALF_RANGE)
+        if pwm_val > SERVO_PWM_THRESHOLD_MAX: pwm_val = SERVO_PWM_THRESHOLD_MAX
+        elif pwm_val < SERVO_PWM_THRESHOLD_MIN: pwm_val = SERVO_PWM_THRESHOLD_MIN
+        return pwm_val
 
     def _unwrap_angle(self, raw_angle):
         if self.rot_enc_prev is None:

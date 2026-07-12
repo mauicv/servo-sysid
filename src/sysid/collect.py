@@ -25,7 +25,7 @@ if __name__ == '__main__':
         start_time = time.time()
         sensor_data = controller.get_sensor_data()
 
-        controller.send_action([2500]*16)
+        controller.send_action([0]*16)
         end_time = time.time()
         elapsed_time = end_time - start_time
         print(sensor_data)
