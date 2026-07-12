@@ -3,6 +3,7 @@ from sysid.hardware import Controller
 from sysid.config import CONTROL_HZ
 import time
 import json
+from tqdm import tqdm
 
 
 if __name__ == '__main__':
@@ -15,7 +16,11 @@ if __name__ == '__main__':
         'data': [],
     }
 
+    print(f'Collecting {len(ds)} rollouts...')
+    pbar = tqdm(total=len(ds))
+
     for rollout in ds.iter_rollouts():
+        pbar.update(1)
         controller.center()
 
         rollout_data = {
@@ -36,6 +41,7 @@ if __name__ == '__main__':
 
         data['data'].append(rollout_data)
 
+    pbar.close()
     with open('data.json', 'w') as f:
         json.dump(data, f)
 
