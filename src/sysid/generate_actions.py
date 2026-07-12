@@ -20,7 +20,7 @@ def generate_chirp(config, seconds=5, freq_low=0.5, freq_high=10):
     return action
 
 
-def generate_step(config, seconds=1, amplitude=1.0):
+def generate_step(config, seconds=1, amplitude=0.625):
     action_hz = config['action_hz']
     t = np.linspace(0, seconds, int(seconds * action_hz), endpoint=False)
     action = np.zeros((len(t),))
@@ -48,12 +48,38 @@ def generate_prbs(config, seconds=3, amplitude=0.2, min_hold=0.05, seed=0):
     return action
 
 
-def generate_ramp(config, seconds=2, amplitude=1.0):
+def generate_ramp(config, seconds=2, amplitude=0.625):
     action_hz = config['action_hz']
     n = int(seconds * action_hz)
     ramp = np.linspace(0, amplitude, n)
     action = np.zeros((n, ))
     action[:] = ramp
+    return action
+
+
+def generate_triangle(config, seconds=2, amplitude=0.2, period=0.5):
+    action_hz = config['action_hz']
+    n = int(seconds * action_hz)
+    t = np.arange(n) / action_hz
+
+    phase = (t % period) / period  # 0 -> 1 sawtooth phase
+    triangle = amplitude * (2 * np.abs(2 * phase - 1) - 1)
+
+    action = np.zeros((n,))
+    action[:] = triangle
+    return action
+
+
+def generate_square(config, seconds=2, amplitude=0.2, period=0.5):
+    action_hz = config['action_hz']
+    n = int(seconds * action_hz)
+    t = np.arange(n) / action_hz
+
+    phase = (t % period) / period
+    square = np.where(phase < 0.5, amplitude, -amplitude)
+
+    action = np.zeros((n,))
+    action[:] = square
     return action
 
 
@@ -107,6 +133,32 @@ if __name__ == "__main__":
         )
         rollout = {
             'type': 'ramp',
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
+
+    print("Generating triangle rollouts...")
+    for amplitude, period in [(0.1, 1), (0.1, 0.75), (0.3, 1), (0.3, 0.75), (0.6, 1), (0.6, 0.75)]:
+        actions_hardware = generate_triangle(
+            config,
+            amplitude=amplitude,
+            period=period
+        )
+        rollout = {
+            'type': 'triangle',
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
+
+    print("Generating square rollouts...")
+    for amplitude, period in [(0.1, 1), (0.1, 0.75), (0.3, 1), (0.3, 0.75), (0.6, 1), (0.6, 0.75)]:
+        actions_hardware = generate_square(
+            config,
+            amplitude=amplitude,
+            period=period
+        )
+        rollout = {
+            'type': 'square',
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
