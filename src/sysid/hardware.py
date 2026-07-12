@@ -15,10 +15,10 @@ bus_lock = th.Lock()
 
 device_map = {
     I2C_MUX_ADDR_1: {
-        "rot_encs": [0,1,2,3,4,5,6,7],
+        "rot_encs": [0],
     },
     I2C_MUX_ADDR_2: {
-        "rot_encs": [0,1,2,3,4,5,6,7],
+        "rot_encs": [],
     },
 }
 
@@ -37,12 +37,10 @@ def _read(bus, addr, reg, data_len):
         return None
 
 def read_sensor_data(bus):
-    rot_enc_data = []
     for mux_addr in [0x70, 0x71]:
         for i in device_map[mux_addr]["rot_encs"]:
             bus.write_byte(mux_addr, 1 << i)
-            dev_data = _read(bus, ROT_ENC_ADDR, 0x0C, 2)
-            rot_enc_data.append(dev_data)
+            rot_enc_data = _read(bus, ROT_ENC_ADDR, 0x0C, 2)
 
     return rot_enc_data
 
@@ -84,14 +82,43 @@ class Controller:
     def __init__(self):
         self.bus = smbus.SMBus(1)
         init_pca9685(self.bus, PWM_MUX_ADDR, freq=100)
-        
+        self.rot_enc_prev = None
+        self.rot_enc_cumulative = None
+        self.center_reading = None
+
     def get_sensor_data(self):
-        sensor_data = read_sensor_data(self.bus)
-        sensor_data = [decode_angle(item) for item in sensor_data]
-        return sensor_data
+        sensor_data = decode_angle(read_sensor_data(self.bus))
+        sensor_data = -sensor_data  # invert the sign of the sensor data
+        reading = self._unwrap_angle(sensor_data)
+        if self.center_reading is None:
+            self.center_reading = reading
+            return reading
+        return reading - self.center_reading
     
     def send_action(self, action):
         write_servos(self.bus, action, 100)
+
+    def center(self):
+        write_servos(self.bus, [1500]*16, 100)
+        time.sleep(2)
+        reading = self.get_sensor_data()
+        self.center_reading = reading
+
+    def _unwrap_angle(self, raw_angle):
+        if self.rot_enc_prev is None:
+            self.rot_enc_prev = raw_angle
+            self.rot_enc_cumulative = raw_angle
+            return raw_angle
+
+        diff = raw_angle - self.rot_enc_prev
+        if diff > 1.0:
+            diff -= 2.0
+        elif diff < -1.0:
+            diff += 2.0
+
+        self.rot_enc_cumulative += diff
+        self.rot_enc_prev = raw_angle
+        return self.rot_enc_cumulative
 
 
 if __name__ == "__main__":
@@ -111,7 +138,7 @@ if __name__ == "__main__":
 
     while True:
         start = time.perf_counter()
-        rot_enc_data = read_sensor_data()
+        rot_enc_data = read_sensor_data(bus)
         elapsed = (time.perf_counter() - start) * 1000
         rot_enc_data = [decode_angle(item) for item in rot_enc_data]
         display(elapsed, rot_enc_data)

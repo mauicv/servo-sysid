@@ -16,7 +16,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "mujoco",
     "smbus2"
 ]
 dynamic = ["version"]
