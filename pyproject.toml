@@ -16,7 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "smbus2"
+    "smbus2",
+    "numpy",
+    "tqdm"
 ]
 dynamic = ["version"]
 

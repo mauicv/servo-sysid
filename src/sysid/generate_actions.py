@@ -58,11 +58,10 @@ def generate_ramp(config, seconds=2, amplitude=1.0):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
     
     config = {
         'action_hz': CONTROL_HZ,
-        'joint_limits': [-2.70, 2.70],
+        'joint_limits': [-0.625, 0.625],
     }
 
     dataset={
