@@ -78,7 +78,7 @@ if __name__ == "__main__":
     dataset['data'].append(rollout)
 
     print("Generating step rollouts...")
-    for amplitude in [-1, -0.9, -0.5, -0.1, 0.1, 0.5, 0.9, 1]:
+    for amplitude in [-0.625, -0.5, -0.35, -0.25, -0.1, 0.1, 0.25, 0.35, 0.5, 0.625]:
         actions_hardware = generate_step(config, 1, amplitude)
         rollout = {
             'type': 'step',
@@ -87,10 +87,11 @@ if __name__ == "__main__":
         dataset['data'].append(rollout)
 
     print("Generating prbs rollouts...")
-    for _ in range(3):
+    for amplitude in [0.1, 0.3, 0.6]:
         actions_hardware = generate_prbs(
             config,
-            seed=np.random.randint(0, 1000000)
+            seed=np.random.randint(0, 1000000),
+            amplitude=amplitude
         )
         rollout = {
             'type': 'prbs',
@@ -99,15 +100,16 @@ if __name__ == "__main__":
         dataset['data'].append(rollout)
 
     print("Generating ramp rollout...")
-    actions_hardware = generate_ramp(
-        config,
-        amplitude=0.4
-    )
-    rollout = {
-        'type': 'ramp',
-        'actions': actions_hardware.tolist(),
-    }
-    dataset['data'].append(rollout)
+    for amplitude in [-0.6, -0.3, -0.1, 0.1, 0.3, 0.6]:
+        actions_hardware = generate_ramp(
+            config,
+            amplitude=amplitude
+        )
+        rollout = {
+            'type': 'ramp',
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
 
     filename = os.path.dirname(__file__) + '/dataset/actions-dataset.json'
     print('saving dataset to', filename)
