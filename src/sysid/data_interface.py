@@ -2,8 +2,11 @@ import json
 import os
 from sysid.config import CONTROL_HZ
 from typing import Literal
-import numpy as np
-from scipy.signal import savgol_filter
+try:
+    import numpy as np
+    from scipy.signal import savgol_filter
+except ImportError:
+    print('numpy and scipy are not installed. Please install them to use this module.')
 
 
 def _validate_config_settings(config: dict):

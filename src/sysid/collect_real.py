@@ -1,4 +1,4 @@
-from sysid.data_interface import ActionDSInterface
+from sysid.data_interface import DSInterface
 from sysid.hardware import Controller
 from sysid.config import CONTROL_HZ
 import time
@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     controller = Controller()
-    ds = ActionDSInterface()
+    ds = DSInterface(dataset_name='actions-dataset')
     dt = 1.0 / CONTROL_HZ
 
     data = {
@@ -17,32 +17,37 @@ if __name__ == '__main__':
         'data': [],
     }
 
-    print(f'Collecting {len(ds)} rollouts...')
-    pbar = tqdm(total=len(ds))
+    controller.center()
+    controller.send_action([0.0] * 16)
+    sensor_data = controller.get_sensor_data()
+    print(sensor_data)
 
-    for rollout in ds.iter_rollouts():
-        pbar.update(1)
-        controller.center()
+    # print(f'Collecting {len(ds)} rollouts...')
+    # pbar = tqdm(total=len(ds))
 
-        rollout_data = {
-            'type': rollout['type'],
-            'actions': [],
-            'sensor_data': [],
-        }
-        for action in rollout['actions']:
-            start_time = time.time()
-            controller.send_action([action] * 16)
-            sensor_data = controller.get_sensor_data()
-            rollout_data['actions'].append(action)
-            rollout_data['sensor_data'].append(sensor_data)
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            if elapsed_time < dt:
-                time.sleep(dt - elapsed_time)
+    # for rollout in ds.iter_rollouts():
+    #     pbar.update(1)
+    #     controller.center()
 
-        data['data'].append(rollout_data)
+    #     rollout_data = {
+    #         'type': rollout['type'],
+    #         'actions': [],
+    #         'sensor_data': [],
+    #     }
+    #     for action in rollout['actions']:
+    #         start_time = time.time()
+    #         controller.send_action([action] * 16)
+    #         sensor_data = controller.get_sensor_data()
+    #         rollout_data['actions'].append(action)
+    #         rollout_data['sensor_data'].append(sensor_data)
+    #         end_time = time.time()
+    #         elapsed_time = end_time - start_time
+    #         if elapsed_time < dt:
+    #             time.sleep(dt - elapsed_time)
 
-    pbar.close()
-    with open('src/sysid/dataset/real-action-state-dataset.json', 'w') as f:
-        json.dump(data, f)
+    #     data['data'].append(rollout_data)
+
+    # pbar.close()
+    # with open('src/sysid/dataset/real-action-state-dataset.json', 'w') as f:
+    #     json.dump(data, f)
 
