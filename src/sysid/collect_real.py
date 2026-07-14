@@ -12,6 +12,7 @@ if __name__ == '__main__':
     dt = 1.0 / CONTROL_HZ
 
     data = {
+        'dataset': 'real',
         'config': ds.config,
         'data': [],
     }
@@ -42,11 +43,6 @@ if __name__ == '__main__':
         data['data'].append(rollout_data)
 
     pbar.close()
-    with open('data.json', 'w') as f:
+    with open('src/sysid/dataset/real-action-state-dataset.json', 'w') as f:
         json.dump(data, f)
 
-# -0.653 - low
-# 0.940 - high
-
-
-# -0.6608058608058598

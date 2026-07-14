@@ -1,21 +1,14 @@
 <mujoco model="miuzei_servo">
   <compiler angle="radian" meshdir="meshes" autolimits="true" />
 
-  <option timestep="0.002" gravity="0 0 -9.8" integrator="implicitfast" />
+  <option timestep="0.002" gravity="0 0 -9.8" integrator="implicitfast">
+    <!-- Fixed base + single hinge; visual geoms don't collide, so there are no
+         contacts to compute. Skipping collision detection speeds up stepping. -->
+    <flag contact="disable" />
+  </option>
 
   <default>
     <!-- Miuzei 25kg servo actuator model -->
-    <default class="miuzei_25kg">
-      <general
-        dyntype="filter"
-        dynprm="0.1"
-        gaintype="fixed"
-        gainprm="500"
-        biastype="affine"
-        biasprm="0 -500 -40"
-        forcerange="-2.70 2.70"
-        forcelimited="true" />
-    </default>
 
     <default class="onshape_export">
       <joint frictionloss="0.1" armature="0.005" />
@@ -84,7 +77,7 @@
       <!-- Moving output: servo horn + arm fixed together, driven by the servo joint -->
       <!-- x=5.5mm, y=-30.1mm,  z=15.35mm -->
       <body name="horn" pos="0 0 0">
-        <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535"/>
+        <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535" range="-1.963 1.963"/>
         <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
         <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" mass="0.031"/>
 
@@ -103,7 +96,19 @@
   </worldbody>
 
   <actuator>
-    <general class="miuzei_25kg" name="servo" joint="servo" />
+    <general
+      name="servo"
+      joint="servo"
+      ctrlrange="-1.963 1.963"
+      dyntype="filter"
+      dynprm="0.1"
+      gaintype="fixed"
+      gainprm="25"
+      biastype="affine"
+      biasprm="0 -25 -5"
+      forcerange="-2.70 2.70"
+      forcelimited="true"
+    />
   </actuator>
 
   <sensor>
