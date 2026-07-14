@@ -19,15 +19,6 @@ def generate_chirp(config, seconds=5, freq_low=0.5, freq_high=10):
     action *= amplitude_signal
     return action
 
-
-def generate_step(config, seconds=1, amplitude=0.625):
-    action_hz = config['action_hz']
-    t = np.linspace(0, seconds, int(seconds * action_hz), endpoint=False)
-    action = np.zeros((len(t),))
-    action[:] = amplitude
-    return action
-
-
 def generate_prbs(config, seconds=3, amplitude=0.2, min_hold=0.05, seed=0):
     action_hz = config['action_hz']
     rng = np.random.default_rng(seed)
@@ -45,6 +36,14 @@ def generate_prbs(config, seconds=3, amplitude=0.2, min_hold=0.05, seed=0):
 
     action = np.zeros((n,))
     action[:] = signal[:n]
+    return action
+
+
+def generate_step(config, seconds=1, amplitude=0.625):
+    action_hz = config['action_hz']
+    t = np.linspace(0, seconds, int(seconds * action_hz), endpoint=False)
+    action = np.zeros((len(t),))
+    action[:] = amplitude
     return action
 
 

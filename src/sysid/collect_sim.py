@@ -13,11 +13,12 @@ best_params_5 = {"kp": 21.896475185763162, "kv": 5.157220084016723, "tau": 0.042
 best_params_6 = {"kp": 158.62945692582923, "kv": 5.743503956633736, "tau": 0.015841356699969715, "damping": 2.76676801635874, "armature": 0.15837818048685476, "force_limit": 13.710588904525258}
 best_params_7 = {"kp": 36.555711631716456, "kv": 1.3439550356858605, "tau": 0.08348584090882719, "damping": 1.6840637165921486, "frictionloss": 0.10659998508713124, "armature": 0.16877042263255881, "force_limit": 7.766416504559106}
 best_params_8 ={"kp": 39.575307690601825, "kv": 4.014456708313679, "tau": 0.01557856952574512, "damping": 1.1601280782347234, "frictionloss": 0.07321278356886803, "armature": 0.1284883142837152, "force_limit": 14.030026386125037}
+best_params_9 = {"kp": 55.16425524424094, "kv": 2.8441638016834414, "tau": 0.013807696318891036, "damping": 1.5439016340657283, "frictionloss": 0.06249036222116202, "armature": 0.12637940307607023, "force_limit": 8.40629855285546}
 initial_params = {'kp': 500, 'kv': 40, 'tau': 0.1, 'damping': 0.1, 'frictionloss': 0.1, 'armature': 0.005}
 # initial_params = {'tau': 0.075}4
 if __name__ == '__main__':
     ds = DSInterface('actions-dataset')
-    env = Env(params=best_params_8)
+    env = Env(params=best_params_9)
 
     data = {
         'dataset': 'simulation',

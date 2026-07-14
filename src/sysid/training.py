@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     ds = SysidDSInterface()
 
-    for generation in range(100):
+    for generation in range(500):
         start_time = time.perf_counter()
         # Sample one evaluation set for the whole generation; all candidates
         # are scored on these same rollouts.
