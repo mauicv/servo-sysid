@@ -7,6 +7,7 @@ import numpy as np
 import time
 import os
 import json
+from sysid.util import NumpyEncoder
 
 
 keys = [
@@ -18,15 +19,6 @@ keys = [
     'armature',
     'force_limit'
 ]
-# initial_params = np.log(np.array([
-#     25,
-#     5,
-#     0.1,
-#     0.1,
-#     # 0.1,
-#     0.005,
-#     2.70
-# ]))
 
 initial_params = np.log(np.array([
     25,
@@ -37,12 +29,6 @@ initial_params = np.log(np.array([
     1,
     5
 ]))
-# keys = ['tau']
-# initial_params = np.log(np.array([1.0]))
-# keys = ['damping', 'frictionloss', 'armature']
-# initial_params = np.log(np.array([0.1, 0.1, 0.005]))
-batch_job = BatchJob(num_processes=os.cpu_count() - 1)
-
 
 def from_log_to_params(log_params):
     return {key: np.exp(value) for key, value in zip(keys, log_params)}
@@ -51,20 +37,7 @@ def from_params_to_log(params):
     return np.log(np.array([params[key] for key in keys]))
 
 
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, np.ndarray):
-            return o.tolist()
-        if isinstance(o, (np.integer,)):
-            return int(o)
-        if isinstance(o, (np.floating,)):
-            return float(o)
-        if isinstance(o, np.bool_):
-            return bool(o)
-        return super().default(o)
-
-
-@batch_job
+@BatchJob(num_processes=os.cpu_count() - 1)
 def job(args):
     # Every candidate is scored on the SAME rollouts (sampled once per generation
     # in the parent) so CMA-ES sees a consistent objective within a generation.

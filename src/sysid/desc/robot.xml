@@ -51,6 +51,8 @@
     <mesh name="screw_5" file="screw_5.stl" />
     <mesh name="screw_6" file="screw_6.stl" />
     <mesh name="screw_7" file="screw_7.stl" />
+    <mesh name="weight" file="weight.stl" />
+    <mesh name="weight_holder" file="weight_holder.stl" />
 
     <!-- Robot materials -->
     <material name="servo_material" rgba="0.4 0.4 0.4 1" />
@@ -59,6 +61,8 @@
     <material name="arm_material" rgba="0.647059 0.647059 0.647059 1" />
     <material name="sensor_material" rgba="0.87451 0.447059 0.317647 1" />
     <material name="screw_material" rgba="0.6 0.6 0.62 1" />
+    <material name="weight_material" rgba="0.3 0.3 0.32 1" />
+    <material name="weight_holder_material" rgba="0.647059 0.647059 0.647059 1" />
   </asset>
 
   <worldbody>
@@ -80,9 +84,6 @@
         <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535" range="-1.963 1.963"/>
         <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
         <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" mass="0.031"/>
-
-        <!-- Weight screws mounted on the arm. Positions are placeholder guesses
-             (all meshes exported centered) — adjust pos to the real screw holes. -->
         <geom type="mesh" class="visual" mesh="screw_0" material="screw_material" mass="0.009"/>
         <geom type="mesh" class="visual" mesh="screw_1" material="screw_material" mass="0.009"/>
         <geom type="mesh" class="visual" mesh="screw_2" material="screw_material" mass="0.009"/>
@@ -91,6 +92,8 @@
         <geom type="mesh" class="visual" mesh="screw_5" material="screw_material" mass="0.009"/>
         <geom type="mesh" class="visual" mesh="screw_6" material="screw_material" mass="0.009"/>
         <geom type="mesh" class="visual" mesh="screw_7" material="screw_material" mass="0.009"/>
+        <geom type="mesh" class="visual" mesh="weight_holder" material="weight_holder_material" pos="0 0 0" mass="0.022"/>
+        <geom type="mesh" class="visual" mesh="weight" material="weight_material" pos="0 0 0" mass="0.227"/>
       </body>
     </body>
   </worldbody>
