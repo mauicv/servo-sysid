@@ -32,16 +32,18 @@ if __name__ == '__main__':
     action = 0.0
     while True:
         start_time = time.time()
-        controller.send_action([action] * 16)
+        if action is not None:
+            controller.send_action([action] * 16)
         sensor_data = controller.get_sensor_data()
         rollout_data['actions'].append(action)
         rollout_data['sensor_data'].append(sensor_data)
         diff = sensor_data - previous_sensor_data
         previous_sensor_data = sensor_data
 
-        if diff > 0.01:
+        if abs(diff) > 0.001 and action is not None:
             action = None
-            count_down = 100
+            count_down = 250
+            print('disconnect detected')
 
         if action is None:
             count_down -= 1
