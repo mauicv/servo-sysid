@@ -5,7 +5,7 @@ import os
 from sysid.config import CONTROL_HZ
 
 
-def generate_chirp(config, seconds=5, freq_low=0.5, freq_high=10):
+def generate_chirp(config, seconds=5, freq_low=0.5, freq_high=3):
     joint_limits = config['joint_limits']
     joint_range = joint_limits[1] - joint_limits[0]
     amplitude = joint_range / 2
@@ -94,26 +94,34 @@ if __name__ == "__main__":
         'config': config,
         'data': [],
     }
-    print("Generating chirp rollouts...")
     
     actions_hardware = generate_chirp(config, 3)
     rollout = {
         'type': 'chirp',
+        'targets': [],
         'actions': actions_hardware.tolist(),
     }
     dataset['data'].append(rollout)
 
-    print("Generating step rollouts...")
-    for amplitude in [-0.625, -0.5, -0.35, -0.25, -0.1, 0.1, 0.25, 0.35, 0.5, 0.625]:
+    for amplitude in [-0.15, -0.1, -0.05, 0.05, 0.1, 0.15]:
         actions_hardware = generate_step(config, 1, amplitude)
         rollout = {
             'type': 'step',
+            'targets': ['kp', 'tau'],
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
 
-    print("Generating prbs rollouts...")
-    for amplitude in [0.1, 0.3, 0.6]:
+    for amplitude in [-0.6, -0.55, 0.55, 0.6]:
+        actions_hardware = generate_step(config, 1, amplitude)
+        rollout = {
+            'type': 'step',
+            'targets': ['force_limit'],
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
+
+    for amplitude in [0.15, 0.1, 0.05]:
         actions_hardware = generate_prbs(
             config,
             seed=np.random.randint(0, 1000000),
@@ -121,11 +129,24 @@ if __name__ == "__main__":
         )
         rollout = {
             'type': 'prbs',
+            'targets': ['kp', 'tau'],
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
 
-    print("Generating ramp rollout...")
+    for amplitude in [0.6, 0.6, 0.55, 0.55]:
+        actions_hardware = generate_prbs(
+            config,
+            seed=np.random.randint(0, 1000000),
+            amplitude=amplitude
+        )
+        rollout = {
+            'type': 'prbs',
+            'targets': ['force_limit'],
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
+
     for amplitude in [-0.6, -0.3, -0.1, 0.1, 0.3, 0.6]:
         actions_hardware = generate_ramp(
             config,
@@ -133,11 +154,11 @@ if __name__ == "__main__":
         )
         rollout = {
             'type': 'ramp',
+            'targets': [],
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
 
-    print("Generating triangle rollouts...")
     for amplitude, period in [(0.1, 1), (0.1, 0.75), (0.3, 1), (0.3, 0.75), (0.6, 1), (0.6, 0.75)]:
         actions_hardware = generate_triangle(
             config,
@@ -146,12 +167,12 @@ if __name__ == "__main__":
         )
         rollout = {
             'type': 'triangle',
+            'targets': [],
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
 
-    print("Generating square rollouts...")
-    for amplitude, period in [(0.1, 1), (0.1, 0.75), (0.3, 1), (0.3, 0.75), (0.6, 1), (0.6, 0.75)]:
+    for amplitude, period in [(0.1, 1), (0.1, 0.75)]:
         actions_hardware = generate_square(
             config,
             amplitude=amplitude,
@@ -159,9 +180,24 @@ if __name__ == "__main__":
         )
         rollout = {
             'type': 'square',
+            'targets': ['kp', 'tau'],
             'actions': actions_hardware.tolist(),
         }
         dataset['data'].append(rollout)
+
+    for amplitude, period in [(0.6, 1), (0.6, 0.75)]:
+        actions_hardware = generate_square(
+            config,
+            amplitude=amplitude,
+            period=period
+        )
+        rollout = {
+            'type': 'square',
+            'targets': ['force_limit'],
+            'actions': actions_hardware.tolist(),
+        }
+        dataset['data'].append(rollout)
+
 
     filename = os.path.dirname(__file__) + '/dataset/actions-dataset.json'
     print('saving dataset to', filename)
