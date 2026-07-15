@@ -103,7 +103,7 @@ if __name__ == "__main__":
     }
     dataset['data'].append(rollout)
 
-    for amplitude in [-0.15, -0.1, -0.05, 0.05, 0.1, 0.15]:
+    for amplitude in [-0.05, -0.025, -0.015, 0.015, 0.025, 0.05]:
         actions_hardware = generate_step(config, 1, amplitude)
         rollout = {
             'type': 'step',
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         }
         dataset['data'].append(rollout)
 
-    for amplitude in [0.15, 0.1, 0.05]:
+    for amplitude in [0.05, 0.025, 0.015]:
         actions_hardware = generate_prbs(
             config,
             seed=np.random.randint(0, 1000000),
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         }
         dataset['data'].append(rollout)
 
-    for amplitude, period in [(0.1, 1), (0.1, 0.75)]:
+    for amplitude, period in [(0.05, 1), (0.05, 0.75), (0.025, 1), (0.025, 0.75), (0.015, 1), (0.015, 0.75)]:
         actions_hardware = generate_square(
             config,
             amplitude=amplitude,
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         }
         dataset['data'].append(rollout)
 
-    for amplitude, period in [(0.6, 1), (0.6, 0.75)]:
+    for amplitude, period in [(0.6, 1), (0.6, 0.75), (0.6, 1), (0.6, 0.75)]:
         actions_hardware = generate_square(
             config,
             amplitude=amplitude,

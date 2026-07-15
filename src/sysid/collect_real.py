@@ -26,6 +26,7 @@ if __name__ == '__main__':
 
         rollout_data = {
             'type': rollout['type'],
+            'targets': rollout['targets'],
             'actions': [],
             'sensor_data': [],
         }
