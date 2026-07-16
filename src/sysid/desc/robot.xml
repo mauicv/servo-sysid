@@ -102,6 +102,7 @@
     <general
       name="servo"
       joint="servo"
+      group="1"
       ctrlrange="-1.963 1.963"
       dyntype="filter"
       dynprm="0.1"

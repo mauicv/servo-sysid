@@ -46,7 +46,7 @@ class SysidDSInterface:
     DATA_DIR = os.path.dirname(__file__) + '/dataset/'
 
     def __init__(self, compute_velocities=True):
-        dataset_name = 'real-action-state-dataset'
+        dataset_name = 'dataset'
 
         with open(self.DATA_DIR + dataset_name + '.json', 'r') as f:
             self.data = json.load(f)
@@ -64,7 +64,7 @@ class SysidDSInterface:
             self.data['data'][i]['velocities'] = v
 
     def compute_weights(self):
-        type_weights = {'chirp': 0, 'step': 0, 'ramp': 0, 'prbs': 0, 'square': 0, 'triangle': 0}
+        type_weights = {'chirp': 0, 'step': 0, 'ramp': 0, 'prbs': 0, 'square': 0, 'triangle': 0, 'drop': 0}
         for rollout in self.data['data']:
             type_weights[rollout['type']] += len(rollout['sensor_data'])
         for rtype in type_weights:
@@ -116,12 +116,16 @@ class SysidDSInterface:
 
 if __name__ == '__main__':
     ds = SysidDSInterface()
+    count = 0
     for data in ds.sample(10, 50):
+        print('--------------------------------')
         print('initial_states       ', data['initial_states'].shape)
         print('initial_velocities   ', data['initial_velocities'].shape)
         print('states               ', data['states'].shape)
         print('velocities           ', data['velocities'].shape)
         print('actions              ', data['actions'].shape)
         print('types                ', data['types'])
-        break
+        count += 1
+        if count > 10:
+            break
 
