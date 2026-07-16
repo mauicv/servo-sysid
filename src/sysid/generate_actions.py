@@ -104,99 +104,107 @@ if __name__ == "__main__":
     dataset['data'].append(rollout)
 
     for amplitude in [-0.05, -0.025, -0.015, 0.015, 0.025, 0.05]:
-        actions_hardware = generate_step(config, 1, amplitude)
-        rollout = {
-            'type': 'step',
-            'targets': ['kp', 'tau'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(3):
+            actions_hardware = generate_step(config, 0.25, amplitude)
+            rollout = {
+                'type': 'step',
+                'targets': ['kp', 'tau'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude in [-0.6, -0.55, 0.55, 0.6]:
-        actions_hardware = generate_step(config, 1, amplitude)
-        rollout = {
-            'type': 'step',
-            'targets': ['force_limit'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(3):
+            actions_hardware = generate_step(config, 1, amplitude)
+            rollout = {
+                'type': 'step',
+                'targets': ['force_limit'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude in [0.05, 0.025, 0.015]:
-        actions_hardware = generate_prbs(
-            config,
-            seed=np.random.randint(0, 1000000),
-            amplitude=amplitude
-        )
-        rollout = {
-            'type': 'prbs',
-            'targets': ['kp', 'tau'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(3):
+            actions_hardware = generate_prbs(
+                config,
+                seed=np.random.randint(0, 1000000),
+                amplitude=amplitude
+            )
+            rollout = {
+                'type': 'prbs',
+                'targets': ['kp', 'tau'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude in [0.6, 0.6, 0.55, 0.55]:
-        actions_hardware = generate_prbs(
-            config,
-            seed=np.random.randint(0, 1000000),
-            amplitude=amplitude
-        )
-        rollout = {
-            'type': 'prbs',
-            'targets': ['force_limit'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(3):
+            actions_hardware = generate_prbs(
+                config,
+                seed=np.random.randint(0, 1000000),
+                amplitude=amplitude
+            )
+            rollout = {
+                'type': 'prbs',
+                'targets': ['force_limit'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude in [-0.6, -0.3, -0.1, 0.1, 0.3, 0.6]:
-        actions_hardware = generate_ramp(
-            config,
-            amplitude=amplitude
-        )
-        rollout = {
-            'type': 'ramp',
-            'targets': [],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(2):
+            actions_hardware = generate_ramp(
+                config,
+                amplitude=amplitude
+            )
+            rollout = {
+                'type': 'ramp',
+                'targets': [],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude, period in [(0.1, 1), (0.1, 0.75), (0.3, 1), (0.3, 0.75), (0.6, 1), (0.6, 0.75)]:
-        actions_hardware = generate_triangle(
-            config,
-            amplitude=amplitude,
-            period=period
-        )
-        rollout = {
-            'type': 'triangle',
-            'targets': [],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(2):
+            actions_hardware = generate_triangle(
+                config,
+                amplitude=amplitude,
+                period=period
+            )
+            rollout = {
+                'type': 'triangle',
+                'targets': [],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude, period in [(0.05, 1), (0.05, 0.75), (0.025, 1), (0.025, 0.75), (0.015, 1), (0.015, 0.75)]:
-        actions_hardware = generate_square(
-            config,
-            amplitude=amplitude,
-            period=period
-        )
-        rollout = {
-            'type': 'square',
-            'targets': ['kp', 'tau'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(2):
+            actions_hardware = generate_square(
+                config,
+                amplitude=amplitude,
+                period=period
+            )
+            rollout = {
+                'type': 'square',
+                'targets': ['kp', 'tau'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
     for amplitude, period in [(0.6, 1), (0.6, 0.75), (0.6, 1), (0.6, 0.75)]:
-        actions_hardware = generate_square(
-            config,
-            amplitude=amplitude,
-            period=period
-        )
-        rollout = {
-            'type': 'square',
-            'targets': ['force_limit'],
-            'actions': actions_hardware.tolist(),
-        }
-        dataset['data'].append(rollout)
+        for _ in range(2):
+            actions_hardware = generate_square(
+                config,
+                amplitude=amplitude,
+                period=period
+            )
+            rollout = {
+                'type': 'square',
+                'targets': ['force_limit'],
+                'actions': actions_hardware.tolist(),
+            }
+            dataset['data'].append(rollout)
 
 
     filename = os.path.dirname(__file__) + '/dataset/actions-dataset.json'
