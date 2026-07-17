@@ -45,17 +45,35 @@ def compute_velocities(rollout):
 class SysidDSInterface:
     DATA_DIR = os.path.dirname(__file__) + '/dataset/'
 
-    def __init__(self, compute_velocities=True):
+    def __init__(self, compute_velocities=True, filter_for=None, filter_short=False):
         dataset_name = 'dataset'
 
         with open(self.DATA_DIR + dataset_name + '.json', 'r') as f:
             self.data = json.load(f)
+        self.filter_for = filter_for
+        if self.filter_for is not None:
+            self.data['data'] = [
+                rollout for rollout in self.data['data'] 
+                if set(rollout['targets']).intersection(set(filter_for)) != set()
+            ]
+        if filter_short:
+            self.data['data'] = [
+                rollout for rollout in self.data['data'] 
+                if len(rollout['sensor_data']) >= 50
+            ]
         self.config = _validate_config_settings(self.data['config'])
         self.num_rollouts = len(self.data['data'])
         self.index_weights = None
         self.compute_weights()
         if compute_velocities:
             self.esimate_velocities()
+
+    def __len__(self):
+        return len(self.data['data'])
+
+    def iter_rollouts(self):
+        for rollout in self.data['data']:
+            yield rollout
 
     def esimate_velocities(self):
         velocities = []
@@ -68,7 +86,8 @@ class SysidDSInterface:
         for rollout in self.data['data']:
             type_weights[rollout['type']] += len(rollout['sensor_data'])
         for rtype in type_weights:
-            type_weights[rtype] = 1 / type_weights[rtype]
+            if type_weights[rtype] != 0:
+                type_weights[rtype] = 1 / type_weights[rtype]
 
         index_weights = [
             type_weights[rollout['type']] * len(rollout['sensor_data'])
@@ -115,9 +134,9 @@ class SysidDSInterface:
 
 
 if __name__ == '__main__':
-    ds = SysidDSInterface()
+    ds = SysidDSInterface(filter_for=['kp', 'tau'])
     count = 0
-    for data in ds.sample(10, 50):
+    for data in ds.sample(10, 12):
         print('--------------------------------')
         print('initial_states       ', data['initial_states'].shape)
         print('initial_velocities   ', data['initial_velocities'].shape)

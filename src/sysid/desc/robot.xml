@@ -81,7 +81,9 @@
       <!-- Moving output: servo horn + arm fixed together, driven by the servo joint -->
       <!-- x=5.5mm, y=-30.1mm,  z=15.35mm -->
       <body name="horn" pos="0 0 0">
-        <joint name="servo" type="hinge" axis="0 1 0" pos="0.0055 0.0301 0.01535" range="-1.963 1.963"/>
+        <!-- axis is -y so gravity swings the arm toward NEGATIVE qpos, matching the
+             (sign-negated) hardware encoder: +command -> +reading, gravity -> -reading. -->
+        <joint name="servo" type="hinge" axis="0 -1 0" pos="0.0055 0.0301 0.01535" range="-1.963 1.963"/>
         <geom type="mesh" class="visual" mesh="servo_horn" material="servo_horn_material" pos="0 0 0" />
         <geom type="mesh" class="visual" mesh="arm" material="arm_material" pos="0 0 0" mass="0.031"/>
         <geom type="mesh" class="visual" mesh="screw_0" material="screw_material" mass="0.009"/>

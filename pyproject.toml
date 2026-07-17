@@ -24,3 +24,6 @@ dynamic = ["version"]
 
 [tool.setuptools.package-data]
 gnoci_gym = ["desc/*.xml", "desc/assets/*", "dataset/*.json"]
+
+[project.scripts]
+sysid = "sysid.cli:cli"
