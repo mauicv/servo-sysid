@@ -1,14 +1,15 @@
-from sysid.data_interface import DSInterface
+from sysid.data_pipeline.data_interface import SysidDSInterface
 from sysid.hardware import Controller
 from sysid.config import CONTROL_HZ
+
+from tqdm import tqdm
 import time
 import json
-from tqdm import tqdm
 
 
-if __name__ == '__main__':
+def collect_responses():
     controller = Controller()
-    ds = DSInterface(dataset_name='actions-dataset')
+    ds = SysidDSInterface(dataset_name='actions')
     dt = 1.0 / CONTROL_HZ
 
     data = {
@@ -44,6 +45,6 @@ if __name__ == '__main__':
         data['data'].append(rollout_data)
 
     pbar.close()
-    with open('src/sysid/dataset/response.json', 'w') as f:
+    with open('../dataset/responses.json', 'w') as f:
         json.dump(data, f)
 

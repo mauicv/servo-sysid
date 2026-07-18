@@ -83,7 +83,7 @@ def generate_square(config, seconds=2, amplitude=0.2, period=0.5):
     return action
 
 
-if __name__ == "__main__":
+def generate_actions():
     
     config = {
         'action_hz': CONTROL_HZ,
@@ -207,7 +207,7 @@ if __name__ == "__main__":
             dataset['data'].append(rollout)
 
 
-    filename = os.path.dirname(__file__) + '/dataset/actions-dataset.json'
+    filename = os.path.dirname(__file__) + '/../dataset/actions.json'
     print('saving dataset to', filename)
     with open(filename, 'w') as f:
         json.dump(dataset, f)

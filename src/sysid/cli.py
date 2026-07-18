@@ -1,6 +1,7 @@
 import click
-from sysid.training import train as train_command
-
+from sysid.data_pipeline.generate_actions import generate_actions as _generate_actions
+from sysid.data_pipeline.collect_real import collect_responses as _collect_responses
+from sysid.data_pipeline.process_data import compute_va as _compute_va
 
 @click.group()
 def cli():
@@ -8,13 +9,16 @@ def cli():
 
 
 @cli.command()
-@click.option('--param_set_name', type=str, required=True)
-@click.option('--num_generations', type=int, default=100)
-@click.option('--population_size', type=int, default=30)
-@click.option('--alpha', type=float, default=0.5)
-@click.option('--name', type=str, default='experiment')
-def train(param_set_name, num_generations, population_size, alpha, name):
-    train_command(param_set_name, num_generations, population_size, alpha, name)
+def collect_responses():
+    _collect_responses()
+
+@cli.command()
+def generate_actions():
+    _generate_actions()
+
+@cli.command()
+def process():
+    _compute_va()
 
 
 if __name__ == '__main__':

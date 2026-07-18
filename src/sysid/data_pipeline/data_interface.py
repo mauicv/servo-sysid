@@ -4,7 +4,6 @@ from sysid.config import CONTROL_HZ
 from typing import Literal
 try:
     import numpy as np
-    from scipy.signal import savgol_filter
 except ImportError:
     print('numpy and scipy are not installed. Please install them to use this module.')
 
@@ -12,41 +11,13 @@ except ImportError:
 def _validate_config_settings(config: dict):
     if config['action_hz'] != CONTROL_HZ:
         raise ValueError(f"Control Hz mismatch: {config['control_hz']} != {CONTROL_HZ}")
-    # print('control hz:', config['action_hz'], 'Hz')
     return config
-
-class DSInterface:
-    DATA_DIR = os.path.dirname(__file__) + '/dataset/'
-
-    def __init__(self, dataset_name: Literal['actions-dataset', 'real-action-state-dataset', 'sim-action-state-dataset']):
-        self.dataset_name = dataset_name
-        with open(self.DATA_DIR + self.dataset_name + '.json', 'r') as f:
-            self.data = json.load(f)
-        self.config = _validate_config_settings(self.data['config'])
-        self.num_rollouts = len(self.data['data'])
-
-    def iter_rollouts(self):
-        for rollout in self.data['data']:
-            yield rollout
-
-    def __len__(self):
-        return len(self.data['data'])
-
-
-def compute_velocities(rollout):
-    # times = np.array(rollout['times'])
-    states = np.array(rollout['sensor_data'])
-    # dt = np.mean(times[1:] - times[:-1])
-    dt = 1 / CONTROL_HZ
-    v = savgol_filter(states, window_length=11, polyorder=3, deriv=1, delta=dt, axis=0)
-    return v
 
 
 class SysidDSInterface:
-    DATA_DIR = os.path.dirname(__file__) + '/dataset/'
+    DATA_DIR = os.path.dirname(__file__) + '/../dataset/'
 
-    def __init__(self, compute_velocities=True, filter_for=None, filter_short=False):
-        dataset_name = 'dataset'
+    def __init__(self, dataset_name: Literal['actions', 'responses', 'dataset'], filter_for=None, filter_short=False):
 
         with open(self.DATA_DIR + dataset_name + '.json', 'r') as f:
             self.data = json.load(f)
@@ -65,8 +36,6 @@ class SysidDSInterface:
         self.num_rollouts = len(self.data['data'])
         self.index_weights = None
         self.compute_weights()
-        if compute_velocities:
-            self.esimate_velocities()
 
     def __len__(self):
         return len(self.data['data'])
@@ -74,12 +43,6 @@ class SysidDSInterface:
     def iter_rollouts(self):
         for rollout in self.data['data']:
             yield rollout
-
-    def esimate_velocities(self):
-        velocities = []
-        for i, rollout in enumerate(self.data['data']):
-            v = compute_velocities(rollout)
-            self.data['data'][i]['velocities'] = v
 
     def compute_weights(self):
         type_weights = {'chirp': 0, 'step': 0, 'ramp': 0, 'prbs': 0, 'square': 0, 'triangle': 0, 'drop': 0}
