@@ -35,7 +35,8 @@ class SysidDSInterface:
         self.config = _validate_config_settings(self.data['config'])
         self.num_rollouts = len(self.data['data'])
         self.index_weights = None
-        self.compute_weights()
+        if dataset_name in ['dataset', 'responses']:
+            self.compute_weights()
 
     def __len__(self):
         return len(self.data['data'])

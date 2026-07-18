@@ -48,7 +48,7 @@ def generate_step(config, seconds=1, amplitude=0.625):
     return action
 
 
-def generate_ramp(config, seconds=2, amplitude=0.625):
+def generate_ramp(config, seconds=3, amplitude=0.625):
     action_hz = config['action_hz']
     n = int(seconds * action_hz)
     ramp = np.linspace(0, amplitude, n)
@@ -57,7 +57,7 @@ def generate_ramp(config, seconds=2, amplitude=0.625):
     return action
 
 
-def generate_triangle(config, seconds=2, amplitude=0.2, period=0.5):
+def generate_triangle(config, seconds=3, amplitude=0.2, period=0.5):
     action_hz = config['action_hz']
     n = int(seconds * action_hz)
     t = np.arange(n) / action_hz
@@ -70,7 +70,7 @@ def generate_triangle(config, seconds=2, amplitude=0.2, period=0.5):
     return action
 
 
-def generate_square(config, seconds=2, amplitude=0.2, period=0.5):
+def generate_square(config, seconds=3, amplitude=0.2, period=0.5):
     action_hz = config['action_hz']
     n = int(seconds * action_hz)
     t = np.arange(n) / action_hz
@@ -105,7 +105,7 @@ def generate_actions():
 
     for amplitude in [-0.05, -0.025, -0.015, 0.015, 0.025, 0.05]:
         for _ in range(3):
-            actions_hardware = generate_step(config, 0.25, amplitude)
+            actions_hardware = generate_step(config, 1, amplitude)
             rollout = {
                 'type': 'step',
                 'targets': ['kp', 'tau'],

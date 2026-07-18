@@ -5,6 +5,7 @@ from sysid.config import CONTROL_HZ
 from tqdm import tqdm
 import time
 import json
+import os
 
 
 def collect_responses():
@@ -45,6 +46,8 @@ def collect_responses():
         data['data'].append(rollout_data)
 
     pbar.close()
-    with open('../dataset/responses.json', 'w') as f:
-        json.dump(data, f)
 
+    filename = os.path.dirname(__file__) + '/../dataset/responses.json'
+    print('saving dataset to', filename)
+    with open(filename, 'w') as f:
+        json.dump(data, f)
