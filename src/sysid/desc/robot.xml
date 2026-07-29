@@ -101,19 +101,16 @@
   </worldbody>
 
   <actuator>
-    <general
-      name="servo"
-      joint="servo"
-      group="1"
-      ctrlrange="-1.963 1.963"
-      dyntype="filter"
-      dynprm="0.1"
-      gaintype="fixed"
-      gainprm="25"
-      biastype="affine"
-      biasprm="0 -25 -5"
-      forcerange="-2.70 2.70"
-      forcelimited="true"
+    <position
+        name="servo"
+        joint="servo"
+        group="1"
+        kp="500.0"
+        kv="40.0"
+        ctrlrange="-1.963 1.963"
+        ctrllimited="true"
+        forcerange="-2.70 2.70"
+        forcelimited="true"
     />
   </actuator>
 

@@ -24,14 +24,13 @@ def _load_model():
 
 
 # Position-servo law: force = gainprm[0]*act + biasprm[1]*qpos + biasprm[2]*qvel,
-# i.e. kp*(ctrl - qpos) - kv*qvel, with a first-order filter of time constant
-# tau (dynprm[0]) on the control. So kp lives in BOTH gainprm[0] and biasprm[1]
-# (as -kp), kv in biasprm[2] (as -kv), and tau in dynprm[0].
+# i.e. kp*(ctrl - qpos) - kv*qvel. So kp lives in BOTH gainprm[0] and biasprm[1]
+# (as -kp), kv in biasprm[2] (as -kv). The <position> actuator has dyntype=none
+# (no filter on the control), so there's no tau/time-constant parameter anymore.
 def set_kp(m, p):
     m.actuator_gainprm[:, 0] = p
     m.actuator_biasprm[:, 1] = -p
 def set_kv(m, p): m.actuator_biasprm[:, 2] = -p
-def set_tau(m, p): m.actuator_dynprm[:, 0] = p
 def set_damping(m, p): m.dof_damping[:] = p
 def set_frictionloss(m, p): m.dof_frictionloss[:] = p
 def set_armature(m, p): m.dof_armature[:] = p
@@ -40,7 +39,6 @@ def set_force_limit(m, p): m.actuator_forcerange[:, 0:2] = np.array([-p, p])
 attr_map = {
     'kp': set_kp,
     'kv': set_kv,
-    'tau': set_tau,
     'damping': set_damping,
     'frictionloss': set_frictionloss,
     'armature': set_armature,
