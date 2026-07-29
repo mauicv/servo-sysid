@@ -70,22 +70,23 @@ class SysidDSInterface:
         states = np.array(rollout['sensor_data'])
         actions = np.array(rollout['actions'])
         velocities = np.array(rollout['velocities'])
-        
+        torque = np.array(rollout['torque'])
+
         if len(states) == length:
-            return states, actions, velocities
+            return states, actions, velocities, torque
         elif len(states) < length:
             raise ValueError(f"Rollout length {len(states)} is greater than requested length {length}")
-        
+
         start = np.random.randint(0, len(states) - length)
         end = start + length
-        return states[start:end], actions[start:end], velocities[start:end]
+        return states[start:end], actions[start:end], velocities[start:end], torque[start:end]
 
     def sample(self, count, length):
         indices = self.sample_index(count)
-        # initial state and velocity conditions need to be mapped back to correct q0, qd0 values 
+        # initial state and velocity conditions need to be mapped back to correct q0, qd0 values
         for index in indices:
             rollout = self.get_rollout(index)
-            s, a, v = self.sample_subset(rollout, length)
+            s, a, v, tau = self.sample_subset(rollout, length)
 
             yield {
                 'initial_states': s[0],
@@ -93,6 +94,7 @@ class SysidDSInterface:
                 'states': s,
                 'velocities': v,
                 'actions': a,
+                'torque': tau,
                 'types': rollout['type'],
             }
 

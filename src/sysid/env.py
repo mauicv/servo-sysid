@@ -1,109 +1,85 @@
-import sys
 import functools
+import math
+from collections import deque
 from pathlib import Path
 
 import mujoco
-import mujoco.viewer
-import math
 import numpy as np
 
 from sysid.config import CONTROL_HZ
-XML = Path(__file__).parent / "desc" / "robot.xml"
 
-PHYSICS_DT    = 0.002
+XML = Path(__file__).parent / "desc" / "robot.xml"
+PHYSICS_DT = 0.002
 
 
 @functools.lru_cache(maxsize=1)
 def _load_model():
-    # Parse the XML and load meshes ONCE per process. The structure never
-    # changes between rollouts — only the (runtime) actuator/dof params do — so
-    # reloading per rollout just re-parses 13 STLs for nothing (~38ms -> ~3ms).
+    # Parse the XML and load meshes ONCE per process (re-parsing 13 STLs per
+    # rollout is wasteful; the structure never changes between rollouts).
     model = mujoco.MjModel.from_xml_path(str(XML))
     model.opt.timestep = PHYSICS_DT
     return model
 
 
-# Position-servo law: force = gainprm[0]*act + biasprm[1]*qpos + biasprm[2]*qvel,
-# i.e. kp*(ctrl - qpos) - kv*qvel, with a first-order filter of time constant
-# tau (dynprm[0]) on the control. So kp lives in BOTH gainprm[0] and biasprm[1]
-# (as -kp), kv in biasprm[2] (as -kv), and tau in dynprm[0].
-def set_kp(m, p):
-    m.actuator_gainprm[:, 0] = p
-    m.actuator_biasprm[:, 1] = -p
-def set_kv(m, p): m.actuator_biasprm[:, 2] = -p
-def set_tau(m, p): m.actuator_dynprm[:, 0] = p
-def set_damping(m, p): m.dof_damping[:] = p
-def set_frictionloss(m, p): m.dof_frictionloss[:] = p
-def set_armature(m, p): m.dof_armature[:] = p
-def set_force_limit(m, p): m.actuator_forcerange[:, 0:2] = np.array([-p, p])
-
-attr_map = {
-    'kp': set_kp,
-    'kv': set_kv,
-    'tau': set_tau,
-    'damping': set_damping,
-    'frictionloss': set_frictionloss,
-    'armature': set_armature,
-    'force_limit': set_force_limit,
-}
-
 class Env:
-    def __init__(self, params, initial_states=None, initial_velocities=None):
-        self.params = params
-        self.initial_states = initial_states
-        self.initial_velocities = initial_velocities
+    """Forward rollout of the bench rig driven by the learned actuator net.
+
+    The rig model has no actuator and no passive friction (it is the inverse-
+    dynamics model), so torque is applied directly via `data.qfrc_applied`. Each
+    control step we build the (pos_err, velocity) history the net was trained on,
+    query it for a torque (N.m), and hold that torque across the physics substeps.
+
+    All positions/velocities are in the normalized policy convention (1.0 == pi rad).
+    `actuator` is a callable: features (2*history,) float array -> torque (N.m).
+    """
+
+    def __init__(self, actuator, history=3, initial_states=None, initial_velocities=None):
+        self.actuator = actuator
+        self.history = history
         self.model = _load_model()
-        # Bit for opt.disableactuator that switches the servo off (zero torque).
-        aid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, "servo")
-        self._servo_disable_mask = 1 << int(self.model.actuator_group[aid])
-        self._set_servo_powered(True)
-        self._apply_params(self.params)
         self.data = mujoco.MjData(self.model)
-        if initial_states is not None:
-            self.data.qpos[:] = self.initial_states
-            self.data.qvel[:] = self.initial_velocities
-        # self.viewer = mujoco.viewer.launch(self.model, self.data)
         self.n_substeps = int(round(1.0 / (CONTROL_HZ * PHYSICS_DT)))
-
-    def _set_servo_powered(self, powered):
-        # disableactuator is a group bitfield: setting the servo's bit makes the
-        # actuator produce zero force (unlike ctrl=0, which still applies the
-        # affine position/velocity bias, i.e. the servo keeps holding).
-        if powered:
-            self.model.opt.disableactuator &= ~self._servo_disable_mask
-        else:
-            self.model.opt.disableactuator |= self._servo_disable_mask
-
-    def _apply_params(self, params):
-        m = self.model
-
-        for key, value in params.items():
-            attr_map[key](m, value)
-
-
-    def step(self, action):
-        # action=None -> cut servo torque (free swing / depowered). Otherwise
-        # power the servo and command it (ctrl in [-1.963, 1.963] ~ radians;
-        # action is in [-1, 1]).
-        if action is None:
-            self._set_servo_powered(False)
-        else:
-            self._set_servo_powered(True)
-            self.data.ctrl[:] = action * math.pi
-        for _ in range(self.n_substeps):
-            mujoco.mj_step(self.model, self.data)
-        return self.data.sensordata / math.pi
+        self._pos_err = deque(maxlen=history)
+        self._vel = deque(maxlen=history)
+        self.reset(initial_states, initial_velocities)
 
     def reset(self, initial_states=None, initial_velocities=None):
-        # Passing new initial states lets a single Env be reused across rollouts
-        # (avoids reallocating MjData every rollout).
         if initial_states is not None:
             self.initial_states = initial_states
             self.initial_velocities = initial_velocities
-        self._apply_params(self.params)
-        self._set_servo_powered(True)
         mujoco.mj_resetData(self.model, self.data)
-        if self.initial_states is not None:
-            self.data.qpos[:] = self.initial_states
-            self.data.qvel[:] = self.initial_velocities
+        if getattr(self, "initial_states", None) is not None:
+            self.data.qpos[:] = np.asarray(self.initial_states) * math.pi
+            self.data.qvel[:] = np.asarray(self.initial_velocities) * math.pi
+        self._pos_err.clear()
+        self._vel.clear()
 
+    def _observe(self):
+        # normalized position/velocity (1.0 == pi rad)
+        return self.data.qpos[0] / math.pi, self.data.qvel[0] / math.pi
+
+    def step(self, action):
+        """Advance one control step. `action` is the target position (normalized).
+
+        Returns the position at the instant the action was applied (matches how
+        the real rig logs sensor_data: read at the start of the control step).
+        """
+        pos, vel = self._observe()
+        pos_err = action - pos
+
+        if not self._pos_err:  # warm-start the history with the first sample
+            for _ in range(self.history):
+                self._pos_err.append(pos_err)
+                self._vel.append(vel)
+        else:
+            self._pos_err.append(pos_err)
+            self._vel.append(vel)
+
+        # feature order matches training: pos_err (oldest..newest) then velocity
+        features = np.array(list(self._pos_err) + list(self._vel), dtype=np.float32)
+        torque = self.actuator(features)
+
+        self.data.qfrc_applied[0] = torque
+        for _ in range(self.n_substeps):
+            mujoco.mj_step(self.model, self.data)
+        return pos
