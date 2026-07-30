@@ -108,7 +108,7 @@ if __name__ == "__main__":
             actions_hardware = generate_step(config, 0.25, amplitude)
             rollout = {
                 'type': 'step',
-                'targets': ['kp', 'tau'],
+                'targets': ['kp'],
                 'actions': actions_hardware.tolist(),
             }
             dataset['data'].append(rollout)
@@ -132,7 +132,7 @@ if __name__ == "__main__":
             )
             rollout = {
                 'type': 'prbs',
-                'targets': ['kp', 'tau'],
+                'targets': ['kp'],
                 'actions': actions_hardware.tolist(),
             }
             dataset['data'].append(rollout)
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             )
             rollout = {
                 'type': 'square',
-                'targets': ['kp', 'tau'],
+                'targets': ['kp'],
                 'actions': actions_hardware.tolist(),
             }
             dataset['data'].append(rollout)

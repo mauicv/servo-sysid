@@ -52,7 +52,7 @@ def job(args):
 
 
 class ParameterSet:
-    default_params = {"kp": 44.87924130639299, "kv": 2.313888096658114, "tau": 0.011233341812325085, "damping": 0.14305820613013226, "frictionloss": 0.00579036832562935, "armature": 0.011710338467774278, "force_limit": 2.19660269119488}
+    default_params = {"kp": 44.87924130639299, "kv": 2.313888096658114, "damping": 0.14305820613013226, "frictionloss": 0.00579036832562935, "armature": 0.011710338467774278, "force_limit": 2.19660269119488}
     def __init__(self, keys):
         self.keys = keys
         self.params = np.log(np.array([[self.default_params[key] for key in self.keys]]))
@@ -74,11 +74,6 @@ class FrictionLossParameterSet(ParameterSet):
         super().__init__(['frictionloss', 'damping', 'armature'])
 
 
-class KpTauParameterSet(ParameterSet):
-    def __init__(self):
-        super().__init__(['kp', 'tau'])
-
-
 class ForceLimitParameterSet(ParameterSet):
     def __init__(self):
         super().__init__(['force_limit'])
@@ -86,7 +81,7 @@ class ForceLimitParameterSet(ParameterSet):
 
 class AllParameterSet(ParameterSet):
     def __init__(self):
-        super().__init__(['kp', 'kv', 'tau', 'damping', 'frictionloss', 'armature', 'force_limit'])
+        super().__init__(['kp', 'kv', 'damping', 'frictionloss', 'armature', 'force_limit'])
 
 
 class FileSystemLogger:
@@ -111,8 +106,6 @@ def train(param_set_name, num_generations=100, population_size=30, alpha=0.5, na
 
     if param_set_name == 'frictionloss':
         param_set = FrictionLossParameterSet()
-    elif param_set_name == 'kp_tau':
-        param_set = KpTauParameterSet()
     elif param_set_name == 'force_limit':
         param_set = ForceLimitParameterSet()
     elif param_set_name == 'all':

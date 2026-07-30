@@ -134,7 +134,7 @@ class SysidDSInterface:
 
 
 if __name__ == '__main__':
-    ds = SysidDSInterface(filter_for=['kp', 'tau'])
+    ds = SysidDSInterface(filter_for=['kp'])
     count = 0
     for data in ds.sample(10, 12):
         print('--------------------------------')
