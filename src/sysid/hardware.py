@@ -19,7 +19,7 @@ bus_lock = th.Lock()
 
 device_map = {
     I2C_MUX_ADDR_1: {
-        "rot_encs": [0],
+        "rot_encs": [2],
     },
     I2C_MUX_ADDR_2: {
         "rot_encs": [],

@@ -1,20 +1,27 @@
 import click
-from sysid.training import train as train_command
 
 
 @click.group()
 def cli():
     pass
 
+try:
+    from sysid.training import train as train_command
 
-@cli.command()
-@click.option('--param_set_name', type=str, required=True)
-@click.option('--num_generations', type=int, default=100)
-@click.option('--population_size', type=int, default=30)
-@click.option('--alpha', type=float, default=0.5)
-@click.option('--name', type=str, default='experiment')
-def train(param_set_name, num_generations, population_size, alpha, name):
-    train_command(param_set_name, num_generations, population_size, alpha, name)
+    @cli.command()
+    @click.option('--param_set_name', type=str, required=True)
+    @click.option('--num_generations', type=int, default=100)
+    @click.option('--population_size', type=int, default=30)
+    @click.option('--alpha', type=float, default=0.5)
+    @click.option('--name', type=str, default='experiment')
+    def train(param_set_name, num_generations, population_size, alpha, name):
+        train_command(param_set_name, num_generations, population_size, alpha, name)
+except ImportError:
+    @cli.command()
+    def train():
+        print('Training is not available. Please install the necessary dependencies.')
+
+
 
 
 if __name__ == '__main__':
