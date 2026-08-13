@@ -25,8 +25,6 @@ if __name__ == '__main__':
         controller.center()
 
         rollout_data = {
-            'type': rollout['type'],
-            'targets': rollout['targets'],
             'actions': [],
             'sensor_data': [],
         }
