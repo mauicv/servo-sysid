@@ -18,7 +18,7 @@ def _validate_config_settings(config: dict):
 class DSInterface:
     DATA_DIR = os.path.dirname(__file__) + '/dataset/'
 
-    def __init__(self, dataset_name: Literal['actions-dataset', 'real-action-state-dataset', 'sim-action-state-dataset']):
+    def __init__(self, dataset_name: Literal['actions']):
         self.dataset_name = dataset_name
         with open(self.DATA_DIR + self.dataset_name + '.json', 'r') as f:
             self.data = json.load(f)

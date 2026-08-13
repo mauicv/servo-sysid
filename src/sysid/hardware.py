@@ -89,7 +89,7 @@ class Controller:
         self.rot_enc_prev = None
         self.rot_enc_cumulative = None
         self.center_reading = None
-        self.scale = (360 / 270)
+        # self.scale = (360 / 270)
 
     def get_sensor_data(self):
         sensor_data = decode_angle(read_sensor_data(self.bus))
@@ -112,8 +112,8 @@ class Controller:
         self.center_reading = reading
 
     def _action_to_pwm(self, action) -> int:
-        action = action * self.scale
-        action = max(-0.625 * self.scale, min(action, 0.625 * self.scale))
+        # action = action * self.scale
+        # action = max(-0.625 * self.scale, min(action, 0.625 * self.scale))
         pwm_val = int(SERVO_PWM_THRESHOLD_MIN + (1 + action) * HALF_RANGE)
         if pwm_val > SERVO_PWM_THRESHOLD_MAX: pwm_val = SERVO_PWM_THRESHOLD_MAX
         elif pwm_val < SERVO_PWM_THRESHOLD_MIN: pwm_val = SERVO_PWM_THRESHOLD_MIN

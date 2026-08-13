@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     controller = Controller()
-    ds = DSInterface(dataset_name='actions-dataset')
+    ds = DSInterface(dataset_name='actions')
     dt = 1.0 / CONTROL_HZ
 
     data = {
