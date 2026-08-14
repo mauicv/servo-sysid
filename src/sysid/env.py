@@ -56,7 +56,6 @@ class Env:
         # Bit for opt.disableactuator that switches the servo off (zero torque).
         aid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, "servo")
         self._servo_disable_mask = 1 << int(self.model.actuator_group[aid])
-        self._set_servo_powered(True)
         self._apply_params(self.params)
         self.data = mujoco.MjData(self.model)
         if initial_states is not None:
@@ -65,34 +64,20 @@ class Env:
         # self.viewer = mujoco.viewer.launch(self.model, self.data)
         self.n_substeps = int(round(1.0 / (CONTROL_HZ * PHYSICS_DT)))
 
-    def _set_servo_powered(self, powered):
-        # disableactuator is a group bitfield: setting the servo's bit makes the
-        # actuator produce zero force (unlike ctrl=0, which still applies the
-        # affine position/velocity bias, i.e. the servo keeps holding).
-        if powered:
-            self.model.opt.disableactuator &= ~self._servo_disable_mask
-        else:
-            self.model.opt.disableactuator |= self._servo_disable_mask
-
     def _apply_params(self, params):
         m = self.model
 
         for key, value in params.items():
             attr_map[key](m, value)
 
-
     def step(self, action):
         # action=None -> cut servo torque (free swing / depowered). Otherwise
         # power the servo and command it (ctrl in [-1.963, 1.963] ~ radians;
         # action is in [-1, 1]).
-        if action is None:
-            self._set_servo_powered(False)
-        else:
-            self._set_servo_powered(True)
-            self.data.ctrl[:] = action * math.pi
+        self.data.ctrl[:] = action
         for _ in range(self.n_substeps):
             mujoco.mj_step(self.model, self.data)
-        return self.data.sensordata / math.pi
+        return self.data.sensordata
 
     def reset(self, initial_states=None, initial_velocities=None):
         # Passing new initial states lets a single Env be reused across rollouts
@@ -101,7 +86,6 @@ class Env:
             self.initial_states = initial_states
             self.initial_velocities = initial_velocities
         self._apply_params(self.params)
-        self._set_servo_powered(True)
         mujoco.mj_resetData(self.model, self.data)
         if self.initial_states is not None:
             self.data.qpos[:] = self.initial_states

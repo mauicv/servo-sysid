@@ -28,7 +28,7 @@ if __name__ == '__main__':
             'actions': [],
             'sensor_data': [],
         }
-        for action in rollout['actions']:
+        for action in rollout['real_actions']:
             start_time = time.time()
             controller.send_action([action] * 16)
             sensor_data = controller.get_sensor_data()
