@@ -5,8 +5,9 @@ import time
 import json
 from tqdm import tqdm
 
-best_params_9 = {"kp": 55.16425524424094, "kv": 2.8441638016834414, "tau": 0.013807696318891036, "damping": 1.5439016340657283, "frictionloss": 0.06249036222116202, "armature": 0.12637940307607023, "force_limit": 8.40629855285546}
-# initial_params = {'tau': 0.075}4
+# best_params_9 = {"kp": 55.16425524424094, "kv": 2.8441638016834414, "damping": 1.5439016340657283, "frictionloss": 0.06249036222116202, "armature": 0.12637940307607023, "force_limit": 8.40629855285546}
+# best_params_9 = {"kp": 55, "kv": 3, "damping": 1.5439016340657283, "frictionloss": 0.06249036222116202, "armature": 0.12637940307607023, "force_limit": 2.746855360183254}
+best_params_9 = {"kp": 65, "kv": 5, "damping": 1.5439016340657283, "frictionloss": 0.06249036222116202, "armature": 0.12637940307607023, "force_limit": 12}
 if __name__ == '__main__':
     ds = DSInterface('actions')
     env = Env(params=best_params_9)

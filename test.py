@@ -21,7 +21,6 @@ from sysid.env import Env
 DEFAULT_PARAMS = {
     "kp": 55.16425524424094,
     "kv": 2.8441638016834414,
-    "tau": 0.013807696318891036,
     "damping": 1.5439016340657283,
     "frictionloss": 0.0,
     "armature": 0.12637940307607023,
@@ -30,7 +29,6 @@ DEFAULT_PARAMS = {
 # DEFAULT_PARAMS = {
 #     "kp": 25.0,
 #     "kv": 5.0,
-#     "tau": 0.1,
 #     "damping": 0.1,
 #     "frictionloss": 0.1,
 #     "armature": 0.005,

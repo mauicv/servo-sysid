@@ -45,22 +45,11 @@ def compute_velocities(rollout):
 class SysidDSInterface:
     DATA_DIR = os.path.dirname(__file__) + '/dataset/'
 
-    def __init__(self, compute_velocities=True, filter_for=None, filter_short=False):
+    def __init__(self, compute_velocities=True):
         dataset_name = 'dataset'
 
         with open(self.DATA_DIR + dataset_name + '.json', 'r') as f:
             self.data = json.load(f)
-        self.filter_for = filter_for
-        if self.filter_for is not None:
-            self.data['data'] = [
-                rollout for rollout in self.data['data'] 
-                if set(rollout['targets']).intersection(set(filter_for)) != set()
-            ]
-        if filter_short:
-            self.data['data'] = [
-                rollout for rollout in self.data['data'] 
-                if len(rollout['sensor_data']) >= 50
-            ]
         self.config = _validate_config_settings(self.data['config'])
         self.num_rollouts = len(self.data['data'])
         self.index_weights = None
@@ -82,19 +71,9 @@ class SysidDSInterface:
             self.data['data'][i]['velocities'] = v
 
     def compute_weights(self):
-        type_weights = {'chirp': 0, 'step': 0, 'ramp': 0, 'prbs': 0, 'square': 0, 'triangle': 0, 'drop': 0}
-        for rollout in self.data['data']:
-            type_weights[rollout['type']] += len(rollout['sensor_data'])
-        for rtype in type_weights:
-            if type_weights[rtype] != 0:
-                type_weights[rtype] = 1 / type_weights[rtype]
-
-        index_weights = [
-            type_weights[rollout['type']] * len(rollout['sensor_data'])
-            for rollout in self.data['data']
-        ]
-        total = sum(index_weights)
-        self.index_weights = [w / total for w in index_weights]
+        lengths = [len(rollout['sensor_data']) for rollout in self.data['data']]
+        total = sum(lengths)
+        self.index_weights = [length / total for length in lengths]
 
     def get_rollout(self, index):
         return self.data['data'][index]
@@ -104,21 +83,24 @@ class SysidDSInterface:
 
     def sample_subset(self, rollout, length=50):
         states = np.array(rollout['sensor_data'])
-        actions = np.array(rollout['actions'])
+        # The sim must be driven with env_actions (env-scale, e.g. radians) not
+        # real_actions (hardware-scale) — real_actions were only used to elicit
+        # this rollout's sensor_data on the physical robot.
+        env_actions = np.array(rollout['env_actions'])
         velocities = np.array(rollout['velocities'])
-        
+
         if len(states) == length:
-            return states, actions, velocities
+            return states, env_actions, velocities
         elif len(states) < length:
             raise ValueError(f"Rollout length {len(states)} is greater than requested length {length}")
-        
+
         start = np.random.randint(0, len(states) - length)
         end = start + length
-        return states[start:end], actions[start:end], velocities[start:end]
+        return states[start:end], env_actions[start:end], velocities[start:end]
 
     def sample(self, count, length):
         indices = self.sample_index(count)
-        # initial state and velocity conditions need to be mapped back to correct q0, qd0 values 
+        # initial state and velocity conditions need to be mapped back to correct q0, qd0 values
         for index in indices:
             rollout = self.get_rollout(index)
             s, a, v = self.sample_subset(rollout, length)
@@ -128,13 +110,12 @@ class SysidDSInterface:
                 'initial_velocities': v[0],
                 'states': s,
                 'velocities': v,
-                'actions': a,
-                'types': rollout['type'],
+                'env_actions': a,
             }
 
 
 if __name__ == '__main__':
-    ds = SysidDSInterface(filter_for=['kp', 'tau'])
+    ds = SysidDSInterface()
     count = 0
     for data in ds.sample(10, 12):
         print('--------------------------------')
@@ -142,8 +123,7 @@ if __name__ == '__main__':
         print('initial_velocities   ', data['initial_velocities'].shape)
         print('states               ', data['states'].shape)
         print('velocities           ', data['velocities'].shape)
-        print('actions              ', data['actions'].shape)
-        print('types                ', data['types'])
+        print('env_actions          ', data['env_actions'].shape)
         count += 1
         if count > 10:
             break

@@ -25,14 +25,18 @@ if __name__ == '__main__':
         controller.center()
 
         rollout_data = {
-            'actions': [],
+            # env_actions is what training later drives the mujoco sim with;
+            # real_actions is what was actually sent to hardware to produce
+            # sensor_data. Keep both — they're on different scales.
+            'env_actions': rollout['env_actions'],
+            'real_actions': [],
             'sensor_data': [],
         }
         for action in rollout['real_actions']:
             start_time = time.time()
             controller.send_action([action] * 16)
             sensor_data = controller.get_sensor_data()
-            rollout_data['actions'].append(action)
+            rollout_data['real_actions'].append(action)
             rollout_data['sensor_data'].append(sensor_data)
             end_time = time.time()
             elapsed_time = end_time - start_time
