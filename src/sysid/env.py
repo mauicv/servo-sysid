@@ -1,5 +1,6 @@
 import sys
 import functools
+from collections import deque
 from pathlib import Path
 
 import mujoco
@@ -46,10 +47,11 @@ attr_map = {
 }
 
 class Env:
-    def __init__(self, params, initial_states=None, initial_velocities=None):
+    def __init__(self, params, initial_states=None, initial_velocities=None, action_delay=0):
         self.params = params
         self.initial_states = initial_states
         self.initial_velocities = initial_velocities
+        self.action_delay = deque(maxlen=action_delay) if action_delay else None
         self.model = _load_model()
         # Bit for opt.disableactuator that switches the servo off (zero torque).
         aid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, "servo")
@@ -72,6 +74,11 @@ class Env:
         # action=None -> cut servo torque (free swing / depowered). Otherwise
         # power the servo and command it (ctrl in [-1.963, 1.963] ~ radians;
         # action is in [-1, 1]).
+        if self.action_delay is not None:
+            # Buffer isn't full yet -> no delayed action available; hold at zero.
+            delayed = self.action_delay[0] if len(self.action_delay) == self.action_delay.maxlen else np.zeros_like(action)
+            self.action_delay.append(action)
+            action = delayed
         self.data.ctrl[:] = action
         for _ in range(self.n_substeps):
             mujoco.mj_step(self.model, self.data)
@@ -83,6 +90,8 @@ class Env:
         if initial_states is not None:
             self.initial_states = initial_states
             self.initial_velocities = initial_velocities
+        if self.action_delay is not None:
+            self.action_delay.clear()
         self._apply_params(self.params)
         mujoco.mj_resetData(self.model, self.data)
         if self.initial_states is not None:
