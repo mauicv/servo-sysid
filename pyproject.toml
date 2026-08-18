@@ -23,7 +23,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools.package-data]
-gnoci_gym = ["desc/*.xml", "desc/assets/*", "dataset/*.json"]
+sysid = ["desc/*.xml", "desc/meshes/*", "dataset/*.json"]
 
 [project.scripts]
 sysid = "sysid.cli:cli"
