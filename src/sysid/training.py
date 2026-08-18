@@ -55,7 +55,7 @@ def job(args):
 
 
 class ParameterSet:
-    default_params = {"kp": 44.87924130639299, "kv": 2.313888096658114, "damping": 0.14305820613013226, "frictionloss": 0.00579036832562935, "armature": 0.011710338467774278, "force_limit": 2.4}
+    default_params = {"kp": 36.81949096939071, "kv": 1.8983427392955468, "damping": 0.11736674184720024, "frictionloss": 0.004750490606992202, "armature": 0.00960730816546369, "force_limit": 2.4}
     def __init__(self, keys):
         self.keys = keys
         self.params = np.log(np.array([[self.default_params[key] for key in self.keys]]))
@@ -84,7 +84,7 @@ class ForceLimitParameterSet(ParameterSet):
 
 class AllParameterSet(ParameterSet):
     def __init__(self):
-        super().__init__(['kp', 'kv', 'damping', 'frictionloss', 'armature'])
+        super().__init__(['kp', 'kv', 'damping', 'frictionloss', 'armature', 'force_limit'])
 
 
 class FileSystemLogger:
