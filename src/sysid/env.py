@@ -13,6 +13,9 @@ XML = Path(__file__).parent / "desc" / "robot.xml"
 
 PHYSICS_DT    = 0.002
 
+# Device spec: 0.13 sec to travel 60 deg -> max no-load slew rate.
+DEFAULT_MAX_SERVO_SPEED = 4.2  # rad/s
+
 
 @functools.lru_cache(maxsize=1)
 def _load_model():
@@ -47,11 +50,13 @@ attr_map = {
 }
 
 class Env:
-    def __init__(self, params, initial_states=None, initial_velocities=None, action_delay=0):
+    def __init__(self, params, initial_states=None, initial_velocities=None, action_delay=0,
+                 max_servo_speed=DEFAULT_MAX_SERVO_SPEED):
         self.params = params
         self.initial_states = initial_states
         self.initial_velocities = initial_velocities
         self.action_delay = deque(maxlen=action_delay) if action_delay else None
+        self.max_servo_speed = max_servo_speed
         self.model = _load_model()
         # Bit for opt.disableactuator that switches the servo off (zero torque).
         aid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, "servo")
@@ -63,6 +68,8 @@ class Env:
             self.data.qvel[:] = self.initial_velocities
         # self.viewer = mujoco.viewer.launch(self.model, self.data)
         self.n_substeps = int(round(1.0 / (CONTROL_HZ * PHYSICS_DT)))
+        self.control_dt = self.n_substeps * PHYSICS_DT
+        self.prev_target = self.data.ctrl.copy()
 
     def _apply_params(self, params):
         m = self.model
@@ -79,6 +86,11 @@ class Env:
             delayed = self.action_delay[0] if len(self.action_delay) == self.action_delay.maxlen else np.zeros_like(action)
             self.action_delay.append(action)
             action = delayed
+        # Clamp the commanded target to what the servo can physically reach
+        # this control step, given its max slew rate.
+        max_delta = self.max_servo_speed * self.control_dt
+        action = np.clip(action, self.prev_target - max_delta, self.prev_target + max_delta)
+        self.prev_target = action
         self.data.ctrl[:] = action
         for _ in range(self.n_substeps):
             mujoco.mj_step(self.model, self.data)
@@ -97,4 +109,5 @@ class Env:
         if self.initial_states is not None:
             self.data.qpos[:] = self.initial_states
             self.data.qvel[:] = self.initial_velocities
+        self.prev_target = self.data.ctrl.copy()
 
