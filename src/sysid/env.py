@@ -14,7 +14,7 @@ XML = Path(__file__).parent / "desc" / "robot.xml"
 PHYSICS_DT    = 0.002
 
 # Device spec: 0.13 sec to travel 60 deg -> max no-load slew rate.
-DEFAULT_MAX_SERVO_SPEED = 4.2  # rad/s
+DEFAULT_MAX_SERVO_SPEED = 6.2  # rad/s
 
 
 @functools.lru_cache(maxsize=1)
